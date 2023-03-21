@@ -1,14 +1,14 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from my_Plotting import my_Plotting
-
 import matplotlib
-
 matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
-
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+
+import os
+
+from src.my_Plotting import my_Plotting
 
 
 
@@ -26,14 +26,17 @@ class gui_Simulator:
     WINDOW_WIDTH_REGRESSION = 1103
     WIDOW_HEIGHT_REGRESSION = 710
 
+    PROJECT_PATH =  os.path.dirname(os.path.dirname(__file__))
+
     def __init__(self, m):
         self.main_object = m
 
         self.window = tk.Tk()
         self.window.title("Perzeptron Simulator - Beta 1.4")
-        self.window.iconphoto(True, tk.PhotoImage(file="Grafiken/Icon_simple_1.png"))
-        self.img_perceptron_linear_classification = tk.PhotoImage(file="Grafiken/Abb_Perzeptron_new.png")
-        self.img_perceptron_linear_regression = tk.PhotoImage(file="Grafiken/Abb_Perzeptron_new_lr.png")
+        self.window.iconphoto(True, tk.PhotoImage(file=self.PROJECT_PATH + "\Grafiken\Icon_simple_1.png"))
+        self.img_perceptron_linear_classification = tk.PhotoImage(file=self.PROJECT_PATH +"\Grafiken\Abb_Perzeptron_new.png")
+        self.img_perceptron_linear_regression = tk.PhotoImage(file=self.PROJECT_PATH +"\Grafiken\Abb_Perzeptron_new_lr.png")
+        self.img_logo_university_1 = tk.PhotoImage(file=self.PROJECT_PATH + "\Grafiken\logo_uni_pa.png")
 
         # set minimum window size value
         self.window.minsize(self.WINDOW_WIDTH_CLASSIFICATION, self.WIDOW_HEIGHT_CLASSIFICATION)
@@ -108,7 +111,6 @@ class gui_Simulator:
         self.lbl_diplay_selected_filepath = ttk.Label(master=self.frm_choose_train_data, width=80)
         self.lbl_diplay_selected_filepath.pack(side=tk.LEFT, fill='x', expand=True)
 
-        self.img_logo_university_1 = tk.PhotoImage(file ="Grafiken/logo_uni_pa.png")
 
         self.lbl_logo_1 = tk.Label(master=self.frm_choose_train_data, image=self.img_logo_university_1)
         self.lbl_logo_1.image = self.img_logo_university_1

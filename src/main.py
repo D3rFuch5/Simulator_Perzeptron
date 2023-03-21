@@ -2,11 +2,11 @@ import tkinter
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 
-from my_Plotting import my_Plotting
-from perceptron import perceptron
-from gui_Simulator import gui_Simulator
+from src.my_Plotting import my_Plotting
+from src.perceptron import perceptron
+from src.gui_Simulator import gui_Simulator
 
-import csv_Reader
+import src.csv_Reader as csv_Reader
 
 
 class main:
@@ -260,6 +260,7 @@ class main:
             self.gui.selected_display_mode_for_linear_regression.set("Geradenansicht")
             self.gui.selected_display_mode_for_linear_regression.trace_add(mode='write',
                                                                            callback=self.call_display_mode_switched_linear_regression)
+            self.gui.current_training_steps.set(0)
 
             # Only for reseting display of perceptron
             self.gui.update_perceptron_visualization(display_training_step=False,
@@ -1538,7 +1539,7 @@ class main:
         return explanation
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    m = main()
-    m.gui.window.mainloop()
+    def start_simulator(self):
+        self.gui.window.mainloop()
+
+
