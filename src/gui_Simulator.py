@@ -1198,7 +1198,7 @@ class gui_Simulator:
                 self.figure_training_data.add_axes(self.plot3D)
                 self.plot3D.dist = 8
                 my_Plotting.plotting_gradient_descent_param_updates_lin_classification_with_trace_3D(
-                    plot=self.plot3D, plot_accuracy=21, dataset=data_point, current_perceptron=current_perceptron)
+                    plot=self.plot3D, plot_accuracy=21, datapoint=data_point, current_perceptron=current_perceptron)
 
         elif self.selected_mode.get() == self.mode_LINEAR_REGRESSION:
             if self.com_box_lin_regression_display_mode.get() == self.mode_LINEAR_REGRESSION_REGRESSION_LINE:

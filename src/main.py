@@ -660,7 +660,7 @@ class main:
                 # erfolgreich initialisiert wurde
                 self.gui.replot(header_data=self.read_in_train_data_header,
                                 training_data=self.read_in_train_data, current_perceptron=self.current_perceptron,
-                                emphasize_point=False)
+                                emphasize_point=False, data_point=self.read_in_train_data[self.index_of_dataset_to_train])
 
             # Perzeptron geladen, aber es liegen keine Trainingsdaten vor
             else:

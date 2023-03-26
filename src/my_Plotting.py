@@ -293,7 +293,7 @@ class my_Plotting:
             plt.ion()
 
     @staticmethod
-    def plotting_gradient_descent_param_updates_lin_classification_with_trace_3D(plot, plot_accuracy, dataset,
+    def plotting_gradient_descent_param_updates_lin_classification_with_trace_3D(plot, plot_accuracy, datapoint,
                                                                                  current_perceptron):
         plot_range_min = -10
         plot_range_max = 10
@@ -316,8 +316,8 @@ class my_Plotting:
 
         # Speichert den jeweiligen Fehler der Gewichts/Schwellenwertkombinationen aus coordinates
         error_for_coordinate_list = []
-        target = dataset[-1]
-        input_data = dataset[:-1]
+        target = datapoint[-1]
+        input_data = datapoint[:-1]
         for parameters in coordinates:
             weighted_sum = 0
             for wi, i in zip(parameters[:-1], input_data):
