@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -29,10 +30,19 @@ class gui_Simulator:
 
         self.window = tk.Tk()
         self.window.title("Perzeptron Simulator - Beta 1.4")
-        self.window.iconphoto(True, tk.PhotoImage(file=".\Grafiken\Icon_simple_1.png"))
-        self.img_perceptron_linear_classification = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new.png")
-        self.img_perceptron_linear_regression = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new_lr.png")
-        self.img_logo_university_1 = tk.PhotoImage(file=".\Grafiken\logo_uni_pa.png")
+        # nt für Windows
+        if os.name =='nt':
+            self.window.iconphoto(True, tk.PhotoImage(file=".\Grafiken\Icon_simple_1.png"))
+            self.img_perceptron_linear_classification = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new.png")
+            self.img_perceptron_linear_regression = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new_lr.png")
+            self.img_logo_university_1 = tk.PhotoImage(file=".\Grafiken\logo_fuchs_wolf.png")
+        # posix für Linux und MacOS
+        else:
+            self.window.iconphoto(True, tk.PhotoImage(file="./Grafiken/Icon_simple_1.png"))
+            self.img_perceptron_linear_classification = tk.PhotoImage(file="./Grafiken/Abb_Perzeptron_new.png")
+            self.img_perceptron_linear_regression = tk.PhotoImage(file="./Grafiken/Abb_Perzeptron_new_lr.png")
+            self.img_logo_university_1 = tk.PhotoImage(file="./Grafiken/logo_fuchs_wolf.png")
+
 
         # set minimum window size value
         self.window.minsize(self.WINDOW_WIDTH_CLASSIFICATION, self.WIDOW_HEIGHT_CLASSIFICATION)
