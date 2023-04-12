@@ -58,6 +58,7 @@ class gui_Simulator:
 
         # Defines font type, font size of all ttk widgets
         app_style = ttk.Style()
+
         app_style.configure('.', font=('Calibri', 12))
 
         style_white = ttk.Style()
@@ -350,7 +351,7 @@ class gui_Simulator:
         self.ck_btn_show_half_areas = ttk.Checkbutton(master=self.frm_radio_buttons_half_area_next_point_to_train,
                                                       text="Halbr\u00E4ume anzeigen",
                                                       variable=self.show_half_area, onvalue=1, offvalue=0,
-                                                      style='TRadiobutton', takefocus=0,
+                                                      style='TRadiobutton',  takefocus=0,
                                                       command=self.main_object.call_replot_show_half_areas)
         self.ck_btn_show_half_areas.pack(anchor='w')
         self.ck_btn_show_next_point_to_train = ttk.Checkbutton(
