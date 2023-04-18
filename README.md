@@ -1,4 +1,4 @@
-# Simulator_Perzeptron Beta 1.4
+# Simulator-Perzeptron Beta 1.4
   <img align="right" src="https://user-images.githubusercontent.com/114241060/232807015-9507efca-3f52-4942-8db4-cd8b4b6f510d.png" width="331" height="253"/>
 
 Für die didaktische Simulation des Perzeptrons, sowie des zugehörigen Lernprozesses wurde die Simulationssoftware Perzeptron-Simulator entwickelt. Die Software kann als Hilfsmittel bei der Umsetzung des Themas Perzeptron des LehrplanPLUS-Kapitels 11.4 Künstliche Intelligenz des bayerischen Lehrplans dienen. Sie eignet sich sowohl um die Funktionsweise, als auch den Lernalgorithmus zum Training des Perzeptrons zu simulieren.
