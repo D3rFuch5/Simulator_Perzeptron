@@ -9,4 +9,4 @@ Die Software bietet die Möglichkeit den Lernprozess eines Perzeptrons für zwei
 Ausführliche Informationen zur Installation und Verwendung der Software finden Sie im Handbuch zum Simulator, welches auch in diesem Repository abrufbar ist.
 
 <p align="center">
- <img src="https://user-images.githubusercontent.com/114241060/232807699-bcb3ed9f-b951-489c-819d-fa3668c8d998.png" width="749" height="539" />
+ <img src="https://user-images.githubusercontent.com/114241060/232807699-bcb3ed9f-b951-489c-819d-fa3668c8d998.png" width="745" height="539" />
