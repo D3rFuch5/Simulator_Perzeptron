@@ -3,12 +3,12 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 import matplotlib
+
 matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
 from src.my_Plotting import my_Plotting
-
 
 
 class gui_Simulator:
@@ -31,7 +31,7 @@ class gui_Simulator:
         self.window = tk.Tk()
         self.window.title("Perzeptron Simulator - Beta 1.4")
         # nt für Windows
-        if os.name =='nt':
+        if os.name == 'nt':
             self.window.iconphoto(True, tk.PhotoImage(file=".\Grafiken\Icon_simple_1.png"))
             self.img_perceptron_linear_classification = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new.png")
             self.img_perceptron_linear_regression = tk.PhotoImage(file=".\Grafiken\Abb_Perzeptron_new_lr.png")
@@ -42,7 +42,6 @@ class gui_Simulator:
             self.img_perceptron_linear_classification = tk.PhotoImage(file="./Grafiken/Abb_Perzeptron_new.png")
             self.img_perceptron_linear_regression = tk.PhotoImage(file="./Grafiken/Abb_Perzeptron_new_lr.png")
             self.img_logo_university_1 = tk.PhotoImage(file="./Grafiken/logo_fuchs_wolf.png")
-
 
         # set minimum window size value
         self.window.minsize(self.WINDOW_WIDTH_CLASSIFICATION, self.WIDOW_HEIGHT_CLASSIFICATION)
@@ -118,7 +117,6 @@ class gui_Simulator:
         self.lbl_diplay_selected_filepath = ttk.Label(master=self.frm_choose_train_data, width=80)
         self.lbl_diplay_selected_filepath.pack(side=tk.LEFT, fill='x', expand=True)
 
-
         self.lbl_logo_1 = tk.Label(master=self.frm_choose_train_data, image=self.img_logo_university_1)
         self.lbl_logo_1.image = self.img_logo_university_1
         self.lbl_logo_1.pack(side=tk.LEFT, padx=(0, 5), fill='x', expand=True)
@@ -167,7 +165,6 @@ class gui_Simulator:
         self.frm_display_perceptron.grid_columnconfigure(0, weight=1)
         # Only the row that should expand as much as possible
         self.frm_display_perceptron.grid_rowconfigure(4, weight=1)
-
 
         self.canvas_perceptron = tk.Canvas(master=self.frm_display_perceptron, width=478, height=285,
                                            background="white")
@@ -351,7 +348,7 @@ class gui_Simulator:
         self.ck_btn_show_half_areas = ttk.Checkbutton(master=self.frm_radio_buttons_half_area_next_point_to_train,
                                                       text="Halbr\u00E4ume anzeigen",
                                                       variable=self.show_half_area, onvalue=1, offvalue=0,
-                                                      style='TRadiobutton',  takefocus=0,
+                                                      style='TRadiobutton', takefocus=0,
                                                       command=self.main_object.call_replot_show_half_areas)
         self.ck_btn_show_half_areas.pack(anchor='w')
         self.ck_btn_show_next_point_to_train = ttk.Checkbutton(
@@ -874,7 +871,7 @@ class gui_Simulator:
 
         self.figure_training_data.add_axes(self.plot2D)
         my_Plotting.plotting_data(self.plot2D, header_data,
-                                  training_data, self.selected_mode.get())
+                                  training_data, self.selected_mode.get(), self.main_object.plot_dimensions)
         my_Plotting.plotting_axis_arrows(self.plot2D)
         self.canvas.draw()
 
@@ -888,7 +885,7 @@ class gui_Simulator:
 
     def update_perceptron_visualization(self, display_training_step, current_perceptron, temp_w_x=1, temp_w_y=1,
                                         temp_threshold=0, training_data_point=None, calculated_output=0,
-                                        current_state="training"):
+                                        current_state="training", classification_first_phase_0=False):
         """
         Methode regelt die Anzeige des Perzeptrons für den aktuellen Modus. Der aktuelle Modus wird automatisch aus dem
         Attribut ausgelesen.
@@ -914,7 +911,6 @@ class gui_Simulator:
 
         self.canvas_perceptron.itemconfig(self.canvas_text_id_explanation_calculation_activation_function, text="")
         self.canvas_perceptron.itemconfig(self.canvas_text_id_expected_output, text="", fill="purple")
-
 
         if self.selected_mode.get() == self.mode_LINEAR_CLASSIFICATION:
 
@@ -1018,9 +1014,13 @@ class gui_Simulator:
                     self.canvas_perceptron.itemconfigure(self.canvas_text_id_threshold,
                                                          text=str(round(current_perceptron.threshold, 1)),
                                                          fill="brown")
-                    # Damit vor dem ersten Einlesen der Punkt nicht angezeigt wird, muss in diesen
-                    # Fällen der current_state nicht auf "classification" gesetzt sein
-                    if self.main_object.classification_phase == "phase_0":
+                    if self.main_object.classification_phase == "phase_1" or (
+                            classification_first_phase_0 and self.main_object.classification_phase == "phase_0"):
+                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_1, text="x\u2081")
+                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_2, text="x\u2082")
+                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_calculated_output,
+                                                             text=" ? ")
+                    elif self.main_object.classification_phase == "phase_0":
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_1,
                                                              text=str(training_data_point[0]))
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_2,
@@ -1035,11 +1035,6 @@ class gui_Simulator:
                             color = "red"
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_expected_output,
                                                              text=text_classification_result, fill=color)
-                    elif self.main_object.classification_phase == "phase_1":
-                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_1, text="x\u2081")
-                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_2, text="x\u2082")
-                        self.canvas_perceptron.itemconfigure(self.canvas_text_id_calculated_output,
-                                                             text=" ? ")
                     elif self.main_object.classification_phase == "phase_2":
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_1,
                                                              text=str(training_data_point[0]))
@@ -1050,7 +1045,7 @@ class gui_Simulator:
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_expected_output,
                                                              text="Erwartete Ausgabe: " + str(
                                                                  int(training_data_point[2])))
-                    if self.main_object.classification_phase == "phase_3":
+                    elif self.main_object.classification_phase == "phase_3":
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_1,
                                                              text=str(training_data_point[0]))
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_2,
@@ -1081,10 +1076,10 @@ class gui_Simulator:
                                                              text=explanation_weighted_sum)
 
                         if weighted_sum > current_perceptron.threshold:
-                            explanation_activation_function = "Die berechnete Ausgabe ist\n gr\u00F6\u00DFer gleich dem Schwellenwert " + str(
+                            explanation_activation_function = "Die berechnete Summe ist\n gr\u00F6\u00DFer gleich dem Schwellenwert " + str(
                                 round(current_perceptron.threshold, 1))
                         else:
-                            explanation_activation_function = "Die berechnete Ausgabe ist\n kleiner als der Schwellenwert " + str(
+                            explanation_activation_function = "Die berechnete Summe ist\n kleiner als der Schwellenwert " + str(
                                 round(
                                     current_perceptron.threshold, 1))
                         self.canvas_perceptron.itemconfigure(
@@ -1127,7 +1122,6 @@ class gui_Simulator:
                     self.canvas_perceptron.itemconfigure(self.canvas_text_id_learining_rate,
                                                          text="")
 
-
                 self.canvas_perceptron.itemconfigure(self.canvas_text_id_w_1,
                                                      text=str(round(current_perceptron.weights[0], 5)), fill="blue")
                 self.canvas_perceptron.itemconfigure(self.canvas_text_id_input_x_2, text=" ")
@@ -1169,7 +1163,8 @@ class gui_Simulator:
                 self.figure_training_data.add_axes(self.plot2D)
 
                 if self.show_half_area.get() == 1:
-                    my_Plotting.fill(self.plot2D, current_perceptron.weights, current_perceptron.threshold)
+                    my_Plotting.fill(self.plot2D, current_perceptron.weights, current_perceptron.threshold,
+                                     self.main_object.plot_dimensions)
 
                 if emphasize_point:
                     my_Plotting.emphasize_point(self.plot2D, data_point)
@@ -1184,7 +1179,7 @@ class gui_Simulator:
                     else:
                         # Aktualisiert den Index des als nächstes zu trainierenden Datums
                         # In call_train wurde bereits trainiert, d.h. die Anzahl der Schritte wurde bereits erhöht
-                        # und da der Inex bei 0 beginnt, muss die Anzahl nicht mehr um 1 erhöht werden
+                        # und da der Index bei 0 beginnt, muss die Anzahl nicht mehr um 1 erhöht werden
                         index_of_next_dataset_to_train = (current_perceptron.number_of_training_steps) % (
                             len(training_data))
                         my_Plotting.annotate_next_training_point(self.plot2D,
@@ -1192,17 +1187,17 @@ class gui_Simulator:
 
                 # Wenn die Klassifikation aktiviert ist, man sich aber nicht in der Eingabephase des zu klassifizierenden
                 # Punkts befindet, wird dieser angezeigt
-                if self.classification_point_enabled.get() == 1 and (
+                if self.classification_point_enabled.get() == 1 and not self.main_object.first_phase_0_after_activation and (
                         self.main_object.classification_phase == "phase_2" or
                         self.main_object.classification_phase == "phase_3" or self.main_object.classification_phase == "phase_0"):
                     my_Plotting.plot_point(self.plot2D, point_to_classify[0], point_to_classify[1])
 
                 # Plotten der akutellen Situation mit Trainingsdaten, Perzeptron und Achsen
                 my_Plotting.plotting_data(self.plot2D, header_data,
-                                          training_data, self.selected_mode.get())
+                                          training_data, self.selected_mode.get(), self.main_object.plot_dimensions)
 
                 my_Plotting.plotting_separation_line(self.plot2D, current_perceptron.weights,
-                                                     current_perceptron.threshold)
+                                                     current_perceptron.threshold, self.main_object.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.plot2D)
             elif self.selected_display_mode_for_linear_classification.get() == self.mode_LINEAR_CLASSIFICATION_WEIGHT_UPDATES:
                 self.figure_training_data.clear()
@@ -1216,9 +1211,9 @@ class gui_Simulator:
                 self.figure_training_data.clear()
                 self.figure_training_data.add_axes(self.plot2D)
                 my_Plotting.plotting_data(self.plot2D, header_data,
-                                          training_data, self.selected_mode.get())
+                                          training_data, self.selected_mode.get(), self.main_object.plot_dimensions)
                 my_Plotting.plotting_regression_line(self.plot2D, current_perceptron.weights,
-                                                     current_perceptron.threshold)
+                                                     current_perceptron.threshold, self.main_object.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.plot2D)
             elif self.com_box_lin_regression_display_mode.get() == self.mode_LINEAR_REGRESSION_GRADIENT_DESCENT:
                 self.figure_training_data.clear()

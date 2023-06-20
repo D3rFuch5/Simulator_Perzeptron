@@ -1,3 +1,4 @@
+import os
 import tkinter
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
@@ -21,6 +22,8 @@ class main:
     default_CLASSIFICATION_POINT_INPUT_X1 = 1
     default_CLASSIFICATION_POINT_INPUT_X2 = 1
     default_CLASSIFICATION_POINT_TARGET = 1
+
+    default_PLOT_DIMENSIONS_2D = [[-10, 10], [-10, 10]]
 
     mode_LINEAR_CLASSIFICATION = "Lineare Klassifikation"
     mode_LINEAR_REGRESSION = "Lineare Regression"
@@ -46,6 +49,8 @@ class main:
         self.index_of_dataset_to_train = 0
         self.size_training_data = 0
 
+        self.plot_dimensions = []
+
         self.data_loaded = False
 
         self.learning_rate_info_already_shown = False
@@ -58,6 +63,8 @@ class main:
         self.point_to_classify_x_1 = self.default_CLASSIFICATION_POINT_INPUT_X1
         self.point_to_classify_x_2 = self.default_CLASSIFICATION_POINT_INPUT_X2
         self.point_to_classify_target = self.default_CLASSIFICATION_POINT_TARGET
+
+        self.first_phase_0_after_activation = True
 
         # Da alle Eingabemöglichkeiten während des Automodes gesperrt werden, kann dieser nur in
         # call_train_automode gesetzt werden
@@ -155,8 +162,11 @@ class main:
             self.read_in_train_data_header = csv_Reader.read_in_csv_header(self.selected_filepath)
             self.read_in_train_data = csv_Reader.read_in_csv(self.selected_filepath)
             self.size_training_data = len(self.read_in_train_data)
+
+            self.plot_dimensions = my_Plotting.calc_dimensions_of_dataset(dataset=self.read_in_train_data)
+
             self.data_loaded = True
-            lbl["text"] = f"{self.selected_filepath}"
+            lbl["text"] = f"{os.path.basename(self.selected_filepath)}"
 
             if self.gui.selected_mode.get() == self.mode_LINEAR_CLASSIFICATION:
                 if self.current_perceptron is not None:
@@ -169,19 +179,23 @@ class main:
                     self.gui.update_progressbar(0, 1)
 
                     my_Plotting.plotting_data(self.gui.plot2D, self.read_in_train_data_header,
-                                              self.read_in_train_data, self.gui.selected_mode.get())
+                                              self.read_in_train_data, self.gui.selected_mode.get(),
+                                              plot_dimensions=self.plot_dimensions)
                     my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                     self.gui.canvas.draw()
             elif self.gui.selected_mode.get() == self.mode_LINEAR_REGRESSION:
                 my_Plotting.plotting_data(self.gui.plot2D, self.read_in_train_data_header,
-                                          self.read_in_train_data, self.gui.selected_mode.get())
+                                          self.read_in_train_data, self.gui.selected_mode.get(),
+                                          plot_dimensions=self.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                 self.gui.canvas.draw()
 
         except Exception as e:
             self.data_loaded = False
+            self.plot_dimensions = self.default_PLOT_DIMENSIONS_2D
             self.selected_filepath = ""
             lbl["text"] = f"{self.selected_filepath}"
+            self.gui.update_progressbar(0, 1)
             err_msg = "Es ist ein Fehler aufgetreten!"
             if type(e) == ValueError:
                 err_msg = "Der gewählte Datensatz enthält Einträge, die keine Zahlen darstellen."
@@ -194,8 +208,13 @@ class main:
             # Damit das Perzeptron bei einem Fehler auch wieder geplottet wird, dieser Fall
             if self.gui.selected_mode.get() == self.mode_LINEAR_CLASSIFICATION and self.current_perceptron is not None:
                 my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                     self.current_perceptron.threshold, data_loaded=False)
+                                                     self.current_perceptron.threshold, self.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.gui.plot2D)
+                if self.gui.show_half_area.get() == 1:
+                    my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
+                                     self.current_perceptron.threshold,
+                                     self.plot_dimensions)
+
                 self.gui.canvas.draw()
 
     def call_general_mode_switch(self, dummy1, dummy2, dummy3):
@@ -239,6 +258,7 @@ class main:
 
             self.index_of_dataset_to_train = 0
             self.size_training_data = 0
+            self.plot_dimensions = self.default_PLOT_DIMENSIONS_2D
             # Zurücksetzen der Perzeptronanzeoge
             self.gui.update_perceptron_visualization(display_training_step=False,
                                                      current_perceptron=self.current_perceptron)
@@ -433,9 +453,9 @@ class main:
                 if self.gui.show_half_area.get() == 1:
                     my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                      self.current_perceptron.threshold,
-                                     data_loaded=False)
+                                     self.plot_dimensions)
                 my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                     self.current_perceptron.threshold, data_loaded=False)
+                                                     self.current_perceptron.threshold, self.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.gui.plot2D)
 
                 # Falls Klassifikation aktiviert ist, muss auch der zu klassifizierende Punkt geplottet werden
@@ -504,9 +524,9 @@ class main:
                 if self.gui.show_half_area.get() == 1:
                     my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                      self.current_perceptron.threshold,
-                                     data_loaded=False)
+                                     self.plot_dimensions)
                 my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                     self.current_perceptron.threshold, data_loaded=False)
+                                                     self.current_perceptron.threshold, self.plot_dimensions)
                 if self.gui.classification_point_enabled.get() == 1 and (
                         not self.classification_phase == "phase_0"):
                     my_Plotting.plot_point(self.gui.plot2D, [self.point_to_classify_x_1, self.point_to_classify_x_2],
@@ -660,7 +680,8 @@ class main:
                 # erfolgreich initialisiert wurde
                 self.gui.replot(header_data=self.read_in_train_data_header,
                                 training_data=self.read_in_train_data, current_perceptron=self.current_perceptron,
-                                emphasize_point=False, data_point=self.read_in_train_data[self.index_of_dataset_to_train])
+                                emphasize_point=False,
+                                data_point=self.read_in_train_data[self.index_of_dataset_to_train])
 
             # Perzeptron geladen, aber es liegen keine Trainingsdaten vor
             else:
@@ -683,10 +704,10 @@ class main:
                 # Anzeige der Trenngerade, welche das Perzeptron symbolisiert
                 self.gui.reset_plotting_figure("2D")
                 my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                     self.current_perceptron.threshold, data_loaded=False)
+                                                     self.current_perceptron.threshold, self.plot_dimensions)
                 if self.gui.show_half_area.get() == 1:
                     my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
-                                     self.current_perceptron.threshold, data_loaded=False)
+                                     self.current_perceptron.threshold, self.plot_dimensions)
                 my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                 self.gui.canvas.draw()
 
@@ -706,7 +727,8 @@ class main:
             self.gui.reset_plotting_figure("2D")
             if self.data_loaded:
                 my_Plotting.plotting_data(plt1=self.gui.plot2D, headerinfo=self.read_in_train_data_header,
-                                          dataset=self.read_in_train_data, acual_mode=self.mode_LINEAR_CLASSIFICATION)
+                                          dataset=self.read_in_train_data, acual_mode=self.mode_LINEAR_CLASSIFICATION,
+                                          plot_dimensions=self.plot_dimensions)
             my_Plotting.plotting_axis_arrows(self.gui.plot2D)
             self.gui.canvas.draw()
 
@@ -774,7 +796,8 @@ class main:
             # Keine Initialisierung aufgrund fehlerhafter Parameter
             if self.data_loaded:
                 my_Plotting.plotting_data(self.gui.plot2D, self.read_in_train_data_header,
-                                          self.read_in_train_data, self.gui.selected_mode.get())
+                                          self.read_in_train_data, self.gui.selected_mode.get(),
+                                          plot_dimensions=self.plot_dimensions)
             else:
                 error_msg += "Keine Daten geladen! Perzeptron wurde nicht initialisiert!\n"
 
@@ -1173,6 +1196,7 @@ class main:
         # Vorbereiten der Klassifikation
         # Herstellen der Initialbelegung
         self.classification_phase = "phase_0"
+        self.first_phase_0_after_activation = True
         self.point_to_classify_x_1 = self.default_CLASSIFICATION_POINT_INPUT_X1
         self.point_to_classify_x_2 = self.default_CLASSIFICATION_POINT_INPUT_X2
         self.point_to_classify_target = self.default_CLASSIFICATION_POINT_TARGET
@@ -1201,7 +1225,6 @@ class main:
                                                                  classification_of_a_point_enabled=1,
                                                                  phase_of_classification=self.classification_phase)
 
-                self.classification_phase = "phase_1"
                 # Sowohl Perzeptron als auch Daten sind geladen
                 if self.data_loaded:
                     self.gui.replot(header_data=self.read_in_train_data_header,
@@ -1215,9 +1238,9 @@ class main:
                     if self.gui.show_half_area.get() == 1:
                         my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                          self.current_perceptron.threshold,
-                                         data_loaded=False)
+                                         self.plot_dimensions)
                     my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                         self.current_perceptron.threshold, data_loaded=False)
+                                                         self.current_perceptron.threshold, self.plot_dimensions)
 
                     my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                     self.gui.canvas.draw()
@@ -1247,9 +1270,9 @@ class main:
                     if self.gui.show_half_area.get() == 1:
                         my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                          self.current_perceptron.threshold,
-                                         data_loaded=False)
+                                         self.plot_dimensions)
                     my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                         self.current_perceptron.threshold, data_loaded=False)
+                                                         self.current_perceptron.threshold, self.plot_dimensions)
                     my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                     self.gui.canvas.draw()
         else:
@@ -1264,9 +1287,8 @@ class main:
         """
         # Einlesen des zu klassifizierenden Datenpunkts und dessen erwartetes Label
         error_msg = ""
-
         # Einlesen und Speichern der eingegebenen Werte. Falls ein Fehler auftritt, wird der Fehlermeldungstext ergänzt
-        if self.classification_phase == "phase_2":
+        if self.classification_phase == "phase_1":
             try:
                 self.point_to_classify_x_1 = int(self.gui.entered_classify_input_x_1.get())
             except:
@@ -1295,10 +1317,24 @@ class main:
         # Wenn der Fehlermeldungstext leer ist, wurden korrekte Eingaben eingelesen
         if error_msg == "":
 
-            if self.classification_phase == "phase_1":
+            # Weiterschalten der Phase
+            if self.classification_phase == "phase_0":
+                self.classification_phase = "phase_1"
+            elif self.classification_phase == "phase_1":
+                self.classification_phase = "phase_2"
+            elif self.classification_phase == "phase_2":
+                self.classification_phase = "phase_3"
+            else:
+                self.classification_phase = "phase_0"
+
+            # Phase Einlesen eines Punkts oder Phase 0 am Beginn
+            # Es muss also kein zu klassifizierender Punkt geplottet werden, nur die reguläre Situation
+            if self.classification_phase == "phase_1" or (
+                    self.first_phase_0_after_activation and self.classification_phase == "phase_0"):
                 self.gui.update_perceptron_visualization(display_training_step=True,
                                                          current_perceptron=self.current_perceptron,
-                                                         current_state="classification")
+                                                         current_state="classification",
+                                                         classification_first_phase_0=self.first_phase_0_after_activation)
                 if self.data_loaded:
                     self.gui.replot(header_data=self.read_in_train_data_header,
                                     training_data=self.read_in_train_data,
@@ -1309,14 +1345,15 @@ class main:
                     if self.gui.show_half_area.get() == 1:
                         my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                          self.current_perceptron.threshold,
-                                         data_loaded=False)
+                                         self.plot_dimensions)
                     my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                         self.current_perceptron.threshold, data_loaded=False)
+                                                         self.current_perceptron.threshold, self.plot_dimensions)
 
                     my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                     self.gui.canvas.draw()
-
-
+                self.first_phase_0_after_activation = False
+            # Phasen in denen der eingelesene Datenpunkt geplottet werden muss
+            # Erster Durchlauf Phase 0 wird bereits oben abgefangen
             elif self.classification_phase == "phase_2" or \
                     self.classification_phase == "phase_3" or \
                     self.classification_phase == "phase_0":
@@ -1333,9 +1370,9 @@ class main:
                     if self.gui.show_half_area.get() == 1:
                         my_Plotting.fill(self.gui.plot2D, self.current_perceptron.weights,
                                          self.current_perceptron.threshold,
-                                         data_loaded=False)
+                                         self.plot_dimensions)
                     my_Plotting.plotting_separation_line(self.gui.plot2D, self.current_perceptron.weights,
-                                                         self.current_perceptron.threshold, data_loaded=False)
+                                                         self.current_perceptron.threshold, self.plot_dimensions)
 
                     my_Plotting.plot_point(self.gui.plot2D, [self.point_to_classify_x_1, self.point_to_classify_x_2],
                                            self.point_to_classify_target)
@@ -1343,6 +1380,7 @@ class main:
                     my_Plotting.plotting_axis_arrows(self.gui.plot2D)
                     self.gui.canvas.draw()
 
+                # Darstellung des Perzeptrons
                 if self.classification_phase == "phase_2":
                     self.gui.update_perceptron_visualization(display_training_step=True,
                                                              current_perceptron=self.current_perceptron,
@@ -1368,19 +1406,11 @@ class main:
                                                              classification_of_a_point_enabled=self.gui.classification_point_enabled.get(),
                                                              phase_of_classification=self.classification_phase)
 
-            # Weiterschalten der Phase
-            if self.classification_phase == "phase_0":
-                self.classification_phase = "phase_1"
-            elif self.classification_phase == "phase_1":
-                self.classification_phase = "phase_2"
-            elif self.classification_phase == "phase_2":
-                self.classification_phase = "phase_3"
-            else:
-                self.classification_phase = "phase_0"
+
 
         # Falls beim Einlesen ein Fehler passiert ist
         else:
-            # Verbleiben in der Phase zu Anzeige der Einlesemöglichkeit
+            # Verbleiben in der Phase zur Anzeige der Einlesemöglichkeit
             self.classification_phase = "phase_1"
             messagebox.showerror(title="Fehler", message=error_msg, parent=self.gui.window)
 
@@ -1538,8 +1568,5 @@ class main:
         explanation = explanation_general + "\n" + explanation_training_round + "\n" + explanation_adjust
         return explanation
 
-
     def start_simulator(self):
         self.gui.window.mainloop()
-
-

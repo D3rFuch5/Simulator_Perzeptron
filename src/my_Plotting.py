@@ -6,11 +6,6 @@ plt.style.use('seaborn-v0_8-whitegrid')
 
 
 class my_Plotting:
-    min_x_for_displaying_dataset = 0
-    max_x_for_displaying_dataset = 0
-
-    min_y_for_displaying_dataset = 0
-    max_y_for_displaying_dataset = 0
 
     # has to be called last be printed with right dimensions
     @staticmethod
@@ -53,14 +48,12 @@ class my_Plotting:
         diff_x = abs(max_x - min_x)
         diff_y = abs(max_y - min_y)
         # Sets the plotting limits according to the min/max values of the data points
-        my_Plotting.min_x_for_displaying_dataset = min_x - np.ceil(0.2 * (diff_x + 1)) - 2
-        my_Plotting.max_x_for_displaying_dataset = max_x + np.ceil(0.2 * (diff_x + 1)) + 2
 
-        my_Plotting.min_y_for_displaying_dataset = min_y - np.ceil((0.2 * (diff_y + 1))) - 2
-        my_Plotting.max_y_for_displaying_dataset = max_y + np.ceil((0.2 * (diff_y + 1))) + 2
+        return [[min_x - np.ceil(0.2 * (diff_x + 1)) - 2, max_x + np.ceil(0.2 * (diff_x + 1)) + 2],
+                [min_y - np.ceil((0.2 * (diff_y + 1))) - 2, max_y + np.ceil((0.2 * (diff_y + 1))) + 2]]
 
     @staticmethod
-    def plotting_data(plt1, headerinfo, dataset, acual_mode):
+    def plotting_data(plt1, headerinfo, dataset, acual_mode, plot_dimensions):
         # Prepare Plotting
         x = []
         y = []
@@ -76,10 +69,8 @@ class my_Plotting:
             else:
                 colors.append("blue")
 
-        # calculated and sets the plotting limits for the data to the calculated limits
-        my_Plotting.calc_dimensions_of_dataset(dataset)
-        plt1.set_xlim([my_Plotting.min_x_for_displaying_dataset, my_Plotting.max_x_for_displaying_dataset])
-        plt1.set_ylim([my_Plotting.min_y_for_displaying_dataset, my_Plotting.max_y_for_displaying_dataset])
+        plt1.set_xlim(plot_dimensions[0])
+        plt1.set_ylim(plot_dimensions[1])
 
         plt1.scatter(x, y, marker='o', c=colors)
         plt1.set_xlabel(headerinfo[0], fontsize=14)
@@ -87,23 +78,12 @@ class my_Plotting:
         plt1.grid(True)
 
     @staticmethod
-    def plotting_separation_line(plt1, weights, threshold, data_loaded=True):
-        if data_loaded:
-            min_x = my_Plotting.min_x_for_displaying_dataset
-            max_x = my_Plotting.max_x_for_displaying_dataset
-            min_y = my_Plotting.min_y_for_displaying_dataset
-            max_y = my_Plotting.max_y_for_displaying_dataset
-
-        else:
-            min_x = -10
-            max_x = 10
-            min_y = -10
-            max_y = 10
+    def plotting_separation_line(plt1, weights, threshold, plot_dimensions):
         # sets the plotting limits for the line to the calculated limits of the data point
-        plt1.set_xlim([min_x, max_x])
-        plt1.set_ylim([min_y, max_y])
+        plt1.set_xlim(plot_dimensions[0])
+        plt1.set_ylim(plot_dimensions[1])
 
-        x = np.linspace(min_x, max_x)
+        x = np.linspace(plot_dimensions[0][0], plot_dimensions[0][1])
         y = []
         # if w_y is zero == > handle division by zero
         if weights[1] == 0 and weights[0] == 0:
@@ -113,7 +93,7 @@ class my_Plotting:
             value = threshold / weights[0]
             x = [value, value]
             # set to y lim
-            y = [min_y, max_y]
+            y = plot_dimensions[1]
 
         else:
             for xCoordinate in x:
@@ -122,61 +102,49 @@ class my_Plotting:
         plt1.plot(x, y, c='blue')
 
     @staticmethod
-    def fill(plt1, weights, threshold, data_loaded=True):
-        if data_loaded:
-            min_x = my_Plotting.min_x_for_displaying_dataset
-            max_x = my_Plotting.max_x_for_displaying_dataset
-            min_y = my_Plotting.min_y_for_displaying_dataset
-            max_y = my_Plotting.max_y_for_displaying_dataset
-
-        else:
-            min_x = -10
-            max_x = 10
-            min_y = -10
-            max_y = 10
-
+    def fill(plt1, weights, threshold, plot_dimensions):
         # Falls die Trenngerade parallel zur y-Achse verläuft (bei x = threshold/weights[0]) ...
         # Falls beide Gewichte 0 sind, ist nichts sinnvoll zu plotten
         # Wäre der bedingungslose else - Fall: Hier weggelassen
         if weights[1] == 0 and weights[0] != 0:
             split_at = threshold / weights[0]
-            x_1 = np.linspace(min_x, split_at)
-            x_2 = np.linspace(split_at, max_x)
+            x_1 = np.linspace(plot_dimensions[0][0], split_at)
+            x_2 = np.linspace(split_at, plot_dimensions[0][1])
             # ... Normalenvektor/Gewichtsvektor zeigt in positive x-Richtung
             if weights[0] > 0:
-                plt1.fill_between(x_2, min_y,
-                                  max_y, color='green', alpha=0.2,
+                plt1.fill_between(x_2, plot_dimensions[1][0],
+                                  plot_dimensions[1][1], color='green', alpha=0.2,
                                   label="Ausgabe Perzeptron: 1")
-                plt1.fill_between(x_1, min_y,
-                                  max_y, color='red', alpha=0.2,
+                plt1.fill_between(x_1, plot_dimensions[1][0],
+                                  plot_dimensions[1][1], color='red', alpha=0.2,
                                   label="Ausgabe Perzeptron: 0")
             # ... Normalenvektor/Gewichtsvektor zeigt in negative x-Richtung
             elif weights[0] < 0:
-                plt1.fill_between(x_1, min_y,
-                                  max_y, color='green', alpha=0.2,
+                plt1.fill_between(x_1, plot_dimensions[1][0],
+                                  plot_dimensions[1][1], color='green', alpha=0.2,
                                   label="Ausgabe Perzeptron: 1")
-                plt1.fill_between(x_2, min_y,
-                                  max_y, color='red', alpha=0.2,
+                plt1.fill_between(x_2, plot_dimensions[1][0],
+                                  plot_dimensions[1][1], color='red', alpha=0.2,
                                   label="Ausgabe Perzeptron: 0")
             plt1.legend(frameon=True, bbox_to_anchor=(1.12, 1.15), loc="upper right")
 
         # Falls das Gewicht w_2(weights[1]) positiv ist, zeigt der Normalenvektor auf jeden Fall nach oben
         elif weights[1] > 0:
-            x = np.linspace(min_x, max_x)
+            x = np.linspace(plot_dimensions[0][0], plot_dimensions[0][1])
             y = my_Plotting.separation_function(x, weights, threshold)
-            plt1.fill_between(x, y, max_y, color='green', alpha=0.2,
+            plt1.fill_between(x, y, plot_dimensions[1][1], color='green', alpha=0.2,
                               label="Ausgabe Perzeptron: 1")
-            plt1.fill_between(x, min_y, y, color='red', alpha=0.2,
+            plt1.fill_between(x, plot_dimensions[1][0], y, color='red', alpha=0.2,
                               label="Ausgabe Perzeptron: 0")
             plt1.legend(frameon=True, bbox_to_anchor=(1.12, 1.15), loc="upper right")
 
         # Falls das Gewicht w_2(weights[1]) negativ ist, zeigt der Normalenvektor auf jeden Fall nach unten
         elif weights[1] < 0:
-            x = np.linspace(min_x, max_x)
+            x = np.linspace(plot_dimensions[0][0], plot_dimensions[0][1])
             y = my_Plotting.separation_function(x, weights, threshold)
-            plt1.fill_between(x, min_y, y, color='green', alpha=0.2,
+            plt1.fill_between(x, plot_dimensions[1][0], y, color='green', alpha=0.2,
                               label="Ausgabe Perzeptron: 1")
-            plt1.fill_between(x, y, max_y, color='red', alpha=0.2,
+            plt1.fill_between(x, y, plot_dimensions[1][1], color='red', alpha=0.2,
                               label="Ausgabe Perzeptron: 0")
             plt1.legend(frameon=True, bbox_to_anchor=(1.12, 1.15), loc="upper right")
 
@@ -392,18 +360,12 @@ class my_Plotting:
 
     # Regression: Hier wird mit dem BIAS gearbeitet
     @staticmethod
-    def plotting_regression_line(current_plot, weights, bias):
-
-        min_x = my_Plotting.min_x_for_displaying_dataset
-        max_x = my_Plotting.max_x_for_displaying_dataset
-        min_y = my_Plotting.min_y_for_displaying_dataset
-        max_y = my_Plotting.max_y_for_displaying_dataset
-
+    def plotting_regression_line(current_plot, weights, bias, plot_dimensions):
         # sets the plotting limits for the line to the calculated limits of the data point
-        current_plot.set_xlim([min_x, max_x])
-        current_plot.set_ylim([min_y, max_y])
+        current_plot.set_xlim(plot_dimensions[0])
+        current_plot.set_ylim(plot_dimensions[1])
 
-        x = np.linspace(min_x, max_x)
+        x = np.linspace(plot_dimensions[0][0], plot_dimensions[0][1])
         y = []
         # if w_y is zero == > handle division by zero
         if weights[0] == 0 and bias == 0:
