@@ -29,7 +29,7 @@ class gui_Simulator:
         self.main_object = m
 
         self.window = tk.Tk()
-        self.window.title("Perzeptron Simulator - Beta 1.4")
+        self.window.title("Perzeptron Simulator - Beta 1.4.1")
         # nt für Windows
         if os.name == 'nt':
             self.window.iconphoto(True, tk.PhotoImage(file=".\Grafiken\Icon_simple_1.png"))
