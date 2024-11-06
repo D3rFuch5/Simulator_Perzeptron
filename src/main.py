@@ -685,6 +685,7 @@ class main:
 
             # Perzeptron geladen, aber es liegen keine Trainingsdaten vor
             else:
+                self.plot_dimensions = self.default_PLOT_DIMENSIONS_2D
                 self.gui.update_progressbar(0, 1)
 
                 # Sicherheitshalber(kann evtl. weg), falls man durch Klick nach der Fehlermeldung und noch geöffnetem
@@ -812,17 +813,13 @@ class main:
         Aktualisiert auch die Anzeige des Perzeptrons, den Plot, die Anzahl der Trainingsschritte und
         ggf. die ProgressBar
         """
-        selected_mode = self.gui.selected_mode.get()
-
-        self.current_perceptron.number_of_training_steps = 0
-        self.gui.current_training_steps.set(0)
-
-        self.index_of_dataset_to_train = 0
 
         # Zurücksetzen der Perzeptronwerte auf die Werte der letzten Initialisierung
         if self.data_loaded and self.current_perceptron is not None:
-
+            selected_mode = self.gui.selected_mode.get()
+            self.index_of_dataset_to_train = 0
             self.current_perceptron.number_of_training_steps = 0
+            self.gui.current_training_steps.set(0)
 
             if selected_mode == self.mode_LINEAR_CLASSIFICATION:
                 self.current_perceptron.weights = [self.initialized_weight_1, self.initialized_weight_2]

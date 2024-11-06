@@ -6,7 +6,7 @@ import matplotlib
 
 matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 
 from src.my_Plotting import my_Plotting
 
@@ -29,7 +29,7 @@ class gui_Simulator:
         self.main_object = m
 
         self.window = tk.Tk()
-        self.window.title("Perzeptron Simulator - Beta 1.4.1")
+        self.window.title("Perzeptron Simulator - Beta 1.4.2")
         # nt für Windows
         if os.name == 'nt':
             self.window.iconphoto(True, tk.PhotoImage(file=".\Grafiken\Icon_simple_1.png"))
@@ -108,6 +108,7 @@ class gui_Simulator:
         self.frm_choose_train_data = tk.LabelFrame(master=self.window, text="W\u00E4hlen Sie die Trainingsdaten aus:",
                                                    font='Calibri 12 bold', borderwidth=0)
         self.frm_choose_train_data.grid(column=1, row=0, columnspan=2, sticky="ew", padx=(5, 0))
+        self.window.columnconfigure(1, weight=1)
 
         self.btn_choose_train_data = ttk.Button(master=self.frm_choose_train_data, text="\u00D6ffnen", width=15,
                                                 command=lambda: self.main_object.open_file(
@@ -125,6 +126,7 @@ class gui_Simulator:
         self.frm_entries = tk.LabelFrame(master=self.window, text="Geben Sie hier die Parameter ein:",
                                          font='Calibri 12 bold', borderwidth=0)
         self.frm_entries.grid(column=0, row=1, columnspan=3, sticky="ew", padx=(5, 0), pady=5)
+        self.window.rowconfigure(1, weight=0)
 
         self.lbl_w_1 = ttk.Label(master=self.frm_entries, text="Gewicht w\u2081: ")
         self.lbl_w_1.pack(side=tk.LEFT)
@@ -158,6 +160,7 @@ class gui_Simulator:
         # Inits and arranges the visualization of the perceptron, training data and linear classifier(line)
         self.frm_display_visualization = ttk.Frame(master=self.window)
         self.frm_display_visualization.grid(column=0, row=2, columnspan=3, sticky="ew", padx=(1, 0))
+        self.window.rowconfigure(2, weight=0)
         self.frm_display_perceptron = ttk.Frame(master=self.frm_display_visualization, relief=tk.GROOVE, borderwidth=5)
         self.frm_display_perceptron.grid(column=0, row=0, sticky="ns")
 
@@ -314,7 +317,8 @@ class gui_Simulator:
 
         # Frames for visualizing training data
         self.frm_display_plotting = ttk.Frame(master=self.frm_display_visualization, relief=tk.GROOVE, borderwidth=5)
-        self.frm_display_plotting.grid(column=1, row=0)
+        self.frm_display_visualization.columnconfigure(1, weight=1)
+        self.frm_display_plotting.grid(column=1, row=0,sticky="nsew")
 
         # Creates a figure with 6*100 x 4*100 pixels
         self.figure_training_data = Figure(figsize=(6, 4.5), dpi=100)
@@ -324,7 +328,7 @@ class gui_Simulator:
         self.plot2D.set_xlabel("x\u2081", fontsize=14)
         self.plot2D.set_ylabel("x\u2082", fontsize=14)
         self.canvas = FigureCanvasTkAgg(self.figure_training_data, master=self.frm_display_plotting)
-        self.canvas.get_tk_widget().grid(column=0, row=0, columnspan=3)
+        self.canvas.get_tk_widget().grid(column=0, row=0, columnspan=2)
 
         self.figure_training_data.clear()
         self.plot3D = self.figure_training_data.add_subplot(111, projection='3d')
@@ -333,17 +337,10 @@ class gui_Simulator:
         self.figure_training_data.clear()
         self.figure_training_data.add_axes(self.plot2D)
 
-        # delete unwanted features
-        NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems if
-                                          t[0] not in ('Pan', 'Subplots', 'Forward')]
-        # setting up toolbar
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.frm_display_plotting, pack_toolbar=False)
-        self.toolbar.update()
-        self.toolbar.grid(column=0, row=1, sticky='nsew', pady=(4, 4))
 
         self.frm_radio_buttons_half_area_next_point_to_train = ttk.Frame(master=self.frm_display_plotting)
-        self.frm_display_plotting.columnconfigure(1, weight=3)
-        self.frm_radio_buttons_half_area_next_point_to_train.grid(column=1, row=1, sticky='e', padx=2)
+        self.frm_radio_buttons_half_area_next_point_to_train.grid(column=0, row=1, sticky='w', padx=2)
+        self.frm_display_plotting.columnconfigure(0, weight=1)
 
         self.ck_btn_show_half_areas = ttk.Checkbutton(master=self.frm_radio_buttons_half_area_next_point_to_train,
                                                       text="Halbr\u00E4ume anzeigen",
@@ -360,9 +357,9 @@ class gui_Simulator:
         self.ck_btn_show_next_point_to_train.pack(anchor='w')
         self.frm_choose_display_mode = tk.LabelFrame(master=self.frm_display_plotting, text="Ansicht",
                                                      font='Calibri 12 bold', borderwidth=0)
-        self.frm_choose_display_mode.grid(column=2, row=1, sticky='n')
+        self.frm_choose_display_mode.grid(column=1, row=1, sticky='n', padx=(0,5))
         self.com_box_lin_classification_display_mode = ttk.Combobox(master=self.frm_choose_display_mode,
-                                                                    state="readonly",
+                                                                    state="readonly", width=21,
                                                                     textvariable=self.selected_display_mode_for_linear_classification,
                                                                     values=[
                                                                         self.mode_LINEAR_CLASSIFICATION_SEPARATION_LINE,
@@ -384,26 +381,27 @@ class gui_Simulator:
         # Anlegen der Darstellungsmöglichkeit für die Anzeige Erklärungen Lineare Klassifikation
         self.frm_explanation_text_classification = ttk.Frame(master=self.window, relief=tk.GROOVE, borderwidth=5,
                                                              style='wht.TFrame')
-        self.frm_explanation_text_classification.grid(column=0, row=3, columnspan=3, sticky="ew", padx=(1, 1))
+        self.frm_explanation_text_classification.grid(column=0, row=3, columnspan=3, sticky="nsew", padx=(1, 1))
+        self.window.rowconfigure(3, weight=1)
 
         self.frm_train_protocol = tk.LabelFrame(master=self.frm_explanation_text_classification,
                                                 text="Trainingsprotokoll", background="white",
-                                                font='Calibri 12 bold', borderwidth=1, relief=tk.GROOVE)
-        self.frm_train_protocol.grid(column=0, row=0, padx=(1, 1))
+                                                font='Calibri 12 bold', borderwidth=0)
+        self.frm_train_protocol.grid(column=0, row=0, padx=(1, 1), sticky='nsew')
 
         self.lbl_explanation_training_protocol = tk.Label(master=self.frm_train_protocol, font=("Calibri", 12),
                                                           background='white', text="", width=59,
                                                           height=7, anchor=tk.NW, justify=tk.LEFT)
-        self.lbl_explanation_training_protocol.pack(side=tk.LEFT, expand=True, fill='x')
+        self.lbl_explanation_training_protocol.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
         self.frm_separation_line = tk.LabelFrame(master=self.frm_explanation_text_classification,
                                                  text="Trenngerade", background="white",
-                                                 font='Calibri 12 bold', borderwidth=1, relief=tk.GROOVE)
-        self.frm_separation_line.grid(column=1, row=0, padx=(5, 1))
+                                                 font='Calibri 12 bold', borderwidth=0)
+        self.frm_separation_line.grid(column=1, row=0, padx=(5, 1), sticky="nsew")
 
         self.lbl_explanation_separation_line = tk.Label(master=self.frm_separation_line, font=("Calibri", 12),
                                                         background='white', width=75,
                                                         height=7, anchor=tk.NW, justify=tk.LEFT)
-        self.lbl_explanation_separation_line.pack(side=tk.LEFT, expand=True, fill='x')
+        self.lbl_explanation_separation_line.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
 
         # Anlegen der Darstellungsmöglichkeit für die Anzeige der Gleichung der Regressionsgerade
         self.frm_explanation_text_regression = ttk.Frame(master=self.window, relief=tk.GROOVE, borderwidth=5,
@@ -484,7 +482,7 @@ class gui_Simulator:
 
         # Anzeige des Erklärungsbereichs
         self.frm_explanation_text_classification.grid_forget()
-        self.frm_explanation_text_regression.grid(column=0, row=3, columnspan=3, sticky="ew", padx=(1, 1))
+        self.frm_explanation_text_regression.grid(column=0, row=3, columnspan=3, sticky="nsew", padx=(1, 1))
 
         # set minimum window size value
         self.window.minsize(self.WINDOW_WIDTH_REGRESSION, self.WIDOW_HEIGHT_REGRESSION)
@@ -528,7 +526,7 @@ class gui_Simulator:
 
         # Anzeige des Erklärungsbereichs
         self.frm_explanation_text_regression.grid_forget()
-        self.frm_explanation_text_classification.grid(column=0, row=3, columnspan=3, sticky="ew", padx=(1, 1))
+        self.frm_explanation_text_classification.grid(column=0, row=3, columnspan=3, sticky="nsew", padx=(1, 1))
 
         # set minimum window size value
         self.window.minsize(self.WINDOW_WIDTH_CLASSIFICATION, self.WIDOW_HEIGHT_CLASSIFICATION)
@@ -674,7 +672,7 @@ class gui_Simulator:
             self.btn_train_auto_mode.pack(side=tk.LEFT, fill='x', expand=True)
             self.btn_train_perceptron.pack(side=tk.LEFT, fill='x', expand=True)
             self.btn_train_reset.pack(side=tk.LEFT, fill='x', expand=True)
-            self.frm_radio_buttons_half_area_next_point_to_train.grid(column=1, row=1, sticky='e', padx=2)
+            self.frm_radio_buttons_half_area_next_point_to_train.grid(column=0, row=1, sticky='e', padx=2)
             self.ck_btn_classifiy_point.grid(column=0, row=0, sticky='w')
         elif self.selected_display_mode_for_linear_classification.get() == self.mode_LINEAR_CLASSIFICATION_WEIGHT_UPDATES:
             self.btn_train_auto_mode.pack_forget()
@@ -726,7 +724,7 @@ class gui_Simulator:
         :param classification_of_a_point_enabled: 0 oder 1 Gibt an, ob momentan die Klassifikation eines Punkts aktiviert ist
         :param display_mode: Nur für Modus "Lineare Klassifikation" relevant. Wählbare Modi (Trenngerade, Gewichtsaktualisierung)
         """
-        self.frm_choose_display_mode.grid(column=2, row=1, sticky='n')
+        self.frm_choose_display_mode.grid(column=1, row=1, sticky='n',padx=(0,5))
         if current_mode == self.mode_LINEAR_REGRESSION:
             self.frm_radio_buttons_half_area_next_point_to_train.grid_forget()
             self.com_box_lin_classification_display_mode.pack_forget()
@@ -734,7 +732,7 @@ class gui_Simulator:
         elif current_mode == self.mode_LINEAR_CLASSIFICATION:
             self.com_box_lin_regression_display_mode.pack_forget()
             if display_mode == self.mode_LINEAR_CLASSIFICATION_SEPARATION_LINE:
-                self.frm_radio_buttons_half_area_next_point_to_train.grid(column=1, row=1, sticky='e', padx=2)
+                self.frm_radio_buttons_half_area_next_point_to_train.grid(column=0, row=1, sticky='w', padx=2)
                 if classification_of_a_point_enabled == 1:
                     self.ck_btn_show_next_point_to_train.pack_forget()
                     self.frm_choose_display_mode.grid_forget()
@@ -743,13 +741,11 @@ class gui_Simulator:
                     self.com_box_lin_classification_display_mode.pack(side=tk.LEFT)
 
                 if auto_mode_running:
-                    self.toolbar.grid_forget()
                     self.com_box_lin_classification_display_mode['state'] = tk.DISABLED
                     # self.ck_btn_show_half_areas['state'] = tk.DISABLED
                     # self.ck_btn_show_next_point_to_train['state'] = tk.DISABLED
 
                 else:
-                    self.toolbar.grid(column=0, row=1, sticky='nsew', pady=(4, 4))
                     self.com_box_lin_classification_display_mode['state'] = "readonly"
                     # self.ck_btn_show_half_areas['state'] = tk.NORMAL
                     # self.ck_btn_show_next_point_to_train['state'] = tk.NORMAL
@@ -1075,7 +1071,7 @@ class gui_Simulator:
                         self.canvas_perceptron.itemconfigure(self.canvas_text_id_explanation_calculation_weighted_sum,
                                                              text=explanation_weighted_sum)
 
-                        if weighted_sum > current_perceptron.threshold:
+                        if weighted_sum >= current_perceptron.threshold:
                             explanation_activation_function = "Die berechnete Summe ist\n gr\u00F6\u00DFer gleich dem Schwellenwert " + str(
                                 round(current_perceptron.threshold, 1))
                         else:
